@@ -11,7 +11,7 @@
             console.log('Attempting to redirect with params:', params.toString());
             
             // Method 1: Custom URL scheme (works on both iOS and Android)
-            const customScheme = `io.supabase.apprush://login?${params.toString()}`;
+            const customScheme = `com.example.apprush`;
             console.log('Trying custom scheme:', customScheme);
             
             // For iOS and modern Android

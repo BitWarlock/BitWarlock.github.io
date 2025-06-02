@@ -1,29 +1,37 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Redirecting to App...</title>
+    <title>Redirecting...</title>
     <script>
-        // Immediate redirect without Android check
+        // Immediate redirect with all parameters
         const params = new URLSearchParams(window.location.search);
-        window.location.href = `io.supabase.apprush://login?${params.toString()}`;
+        const redirectUrl = `intent://login?${params.toString()}#Intent;scheme=io.supabase.apprush;package=io.supabase.apprush;end`;
         
-        // Fallback message after 3 seconds
+        // Try intent-based redirect first (works better on Android)
+        window.location.href = redirectUrl;
+        
+        // Fallback after 500ms if still on page
+        setTimeout(() => {
+            if (!document.hidden) {
+                window.location.href = `io.supabase.apprush://login?${params.toString()}`;
+            }
+        }, 500);
+        
+        // Ultimate fallback
         setTimeout(() => {
             document.body.innerHTML = `
-                <h1 style="font-family: Arial; color: #333;">
-                    Redirect failed
-                </h1>
-                <p>Please return to the app manually</p>
-                <button onclick="window.history.back()">Go Back</button>
+                <h1>Authentication Complete</h1>
+                <p>Please return to the app</p>
+                <button onclick="window.close()">Close</button>
             `;
-        }, 3000);
+        }, 2000);
     </script>
     <style>
         body {
-            background: white;
-            text-align: center;
-            padding: 50px;
             font-family: Arial;
+            text-align: center;
+            padding: 2rem;
+            background: #f5f5f5;
         }
     </style>
 </head>

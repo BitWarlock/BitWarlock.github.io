@@ -2,42 +2,125 @@
 <html>
 <head>
     <title>Redirecting...</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script>
         function redirectToApp() {
             const params = new URLSearchParams(window.location.search);
             const code = params.get('code');
             
-            // Method 1: Try direct deep link
-            window.location.href = `io.supabase.apprush://login;
+            console.log('Attempting to redirect with params:', params.toString());
             
-            // Method 2: Fallback after delay
+            // Method 1: Custom URL scheme (works on both iOS and Android)
+            const customScheme = `io.supabase.apprush://login?${params.toString()}`;
+            console.log('Trying custom scheme:', customScheme);
+            
+            // For iOS and modern Android
+            window.location.href = customScheme;
+            
+            // Method 2: Android Intent fallback
             setTimeout(() => {
                 if (!document.hidden) {
-                    // Android Intent fallback
-                    window.location.href = `intent://login?${params.toString()}#Intent;scheme=io.supabase.apprush;package=io.supabase.apprush;end`;
+                    const intentUrl = `intent://login?${params.toString()}#Intent;scheme=io.supabase.apprush;package=com.yourcompany.apprush;end`;
+                    console.log('Trying Android intent:', intentUrl);
+                    window.location.href = intentUrl;
                 }
-            }, 300);
+            }, 500);
             
-            // Final fallback
+            // Method 3: Universal Links fallback (if configured)
             setTimeout(() => {
-                document.body.innerHTML = `
-                    <h1>Authentication Complete</h1>
-                    <p>Please return to the app manually</p>
-                    <button onclick="window.close()">Close Window</button>
-                `;
-            }, 1500);
+                if (!document.hidden) {
+                    // Replace with your actual universal link domain
+                    const universalLink = `https://your-app-domain.com/login?${params.toString()}`;
+                    console.log('Trying universal link:', universalLink);
+                    window.location.href = universalLink;
+                }
+            }, 1000);
+            
+            // Final fallback - show manual instructions
+            setTimeout(() => {
+                if (!document.hidden) {
+                    document.body.innerHTML = `
+                        <div style="max-width: 400px; margin: 0 auto; padding: 20px;">
+                            <h1>✅ Authentication Complete</h1>
+                            <p>If the app didn't open automatically:</p>
+                            <ol style="text-align: left; margin: 20px 0;">
+                                <li>Return to your Flutter app manually</li>
+                                <li>The authentication should complete automatically</li>
+                            </ol>
+                            <div style="margin: 20px 0;">
+                                <button onclick="retryRedirect()" style="padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                                    Try Again
+                                </button>
+                                <button onclick="window.close()" style="padding: 10px 20px; margin: 5px; background: #6c757d; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                                    Close
+                                </button>
+                            </div>
+                            <details style="margin-top: 20px; text-align: left;">
+                                <summary>Debug Info</summary>
+                                <pre style="background: #f8f9fa; padding: 10px; border-radius: 3px; font-size: 12px;">
+URL Parameters: ${params.toString()}
+Custom Scheme: ${customScheme}
+User Agent: ${navigator.userAgent}
+                                </pre>
+                            </details>
+                        </div>
+                    `;
+                }
+            }, 2000);
         }
+        
+        function retryRedirect() {
+            redirectToApp();
+        }
+        
+        // Handle page visibility changes
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                console.log('Page hidden - app likely opened');
+            }
+        });
     </script>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             text-align: center;
             padding: 20px;
-            background-color: #f5f5f5;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body onload="redirectToApp()">
-    <p>Redirecting to app...</p>
+    <div class="loading">
+        <div class="spinner"></div>
+        <p>Redirecting to your app...</p>
+        <small>This may take a few seconds</small>
+    </div>
 </body>
 </html>

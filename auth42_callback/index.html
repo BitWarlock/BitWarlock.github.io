@@ -1,32 +1,31 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Redirecting...</title>
+    <title>Redirecting to App...</title>
     <script>
-        // Extract parameters from URL
+        // Immediate redirect without Android check
         const params = new URLSearchParams(window.location.search);
+        window.location.href = `io.supabase.apprush://login?${params.toString()}`;
         
-        // Redirect to app if on Android
-        if (/Android/i.test(navigator.userAgent)) {
-            window.location.href = `io.supabase.apprush://login?${params.toString()}`;
-        } else {
-            // Fallback for non-Android or if app not installed
-            document.body.innerHTML = `
-                <h1>Authentication Complete</h1>
-                <p>Return to the app to continue</p>
-                <button onclick="window.close()">Close</button>
-            `;
-        }
-        
-        // Optional: Timeout fallback
+        // Fallback message after 3 seconds
         setTimeout(() => {
-            if (!window.closed) {
-                document.body.innerHTML += `
-                    <p>Redirect failed. Please return to the app manually.</p>
-                `;
-            }
+            document.body.innerHTML = `
+                <h1 style="font-family: Arial; color: #333;">
+                    Redirect failed
+                </h1>
+                <p>Please return to the app manually</p>
+                <button onclick="window.history.back()">Go Back</button>
+            `;
         }, 3000);
     </script>
+    <style>
+        body {
+            background: white;
+            text-align: center;
+            padding: 50px;
+            font-family: Arial;
+        }
+    </style>
 </head>
 <body>
     <p>Redirecting to app...</p>

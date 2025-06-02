@@ -3,39 +3,41 @@
 <head>
     <title>Redirecting...</title>
     <script>
-        // Immediate redirect with all parameters
-        const params = new URLSearchParams(window.location.search);
-        const redirectUrl = `intent://login?${params.toString()}#Intent;scheme=io.supabase.apprush;package=io.supabase.apprush;end`;
-        
-        // Try intent-based redirect first (works better on Android)
-        window.location.href = redirectUrl;
-        
-        // Fallback after 500ms if still on page
-        setTimeout(() => {
-            if (!document.hidden) {
-                window.location.href = `io.supabase.apprush://login?${params.toString()}`;
-            }
-        }, 500);
-        
-        // Ultimate fallback
-        setTimeout(() => {
-            document.body.innerHTML = `
-                <h1>Authentication Complete</h1>
-                <p>Please return to the app</p>
-                <button onclick="window.close()">Close</button>
-            `;
-        }, 2000);
+        function redirectToApp() {
+            const params = new URLSearchParams(window.location.search);
+            const code = params.get('code');
+            
+            // Method 1: Try direct deep link
+            window.location.href = `io.supabase.apprush://login;
+            
+            // Method 2: Fallback after delay
+            setTimeout(() => {
+                if (!document.hidden) {
+                    // Android Intent fallback
+                    window.location.href = `intent://login?${params.toString()}#Intent;scheme=io.supabase.apprush;package=io.supabase.apprush;end`;
+                }
+            }, 300);
+            
+            // Final fallback
+            setTimeout(() => {
+                document.body.innerHTML = `
+                    <h1>Authentication Complete</h1>
+                    <p>Please return to the app manually</p>
+                    <button onclick="window.close()">Close Window</button>
+                `;
+            }, 1500);
+        }
     </script>
     <style>
         body {
-            font-family: Arial;
+            font-family: Arial, sans-serif;
             text-align: center;
-            padding: 2rem;
-            background: #f5f5f5;
+            padding: 20px;
+            background-color: #f5f5f5;
         }
     </style>
 </head>
-<body>
+<body onload="redirectToApp()">
     <p>Redirecting to app...</p>
 </body>
 </html>
